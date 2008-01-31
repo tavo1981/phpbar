@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Db flnm="phpbar" nm="phpbar" ver="1.3.4">
+  <VerLbl/>
+  <VerNotes/>
+  <DefTblOpts/>
+  <DocFolder>/dados/phpbar/docs</DocFolder>
+  <Sch Cm="" nm="phpbar">
+    <Tbl UsSo="1" nm="clientes">
+      <TblOpts/>
+      <Pk ClNs="cli_id" nm="pkclientes"/>
+      <Cl au="1" df="" nm="cli_id" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Código do Cliente</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="cli_nome" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="85" sc="null" sg="1"/>
+        <Cm>Nome do Cliente</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="cli_ruaid" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Rua</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="cli_endnum" nu="1">
+        <DT ds="VarChar" en="" id="12" ln="50" sc="null" sg="1"/>
+        <Cm>Número</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="cli_complemento" nu="1">
+        <DT ds="VarChar" en="" id="12" ln="85" sc="null" sg="1"/>
+        <Cm>Complemento</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="cli_baiid" nu="1">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Bairro</Cm>
+      </Cl>
+      <Idx clu="0" nm="clientes_cli_baiid_Idx" unq="0">
+        <ClNs>cli_baiid</ClNs>
+      </Idx>
+      <Idx clu="0" nm="clientes_cli_ruaid_Idx" unq="0">
+        <ClNs>cli_ruaid</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="clifones">
+      <Cm>Telefones do Cliente</Cm>
+      <TblOpts/>
+      <Pk ClNs="fon_id" nm="pkclifones"/>
+      <Cl au="1" df="" nm="fon_id" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="fon_cliid" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>codigo do cliente</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="fon_tipo" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>tipo do fone</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="fon_numero" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Fone</Cm>
+      </Cl>
+      <Fk deAc="3" nm="clifones_fon_cliid_fk" prLkCl="cli_id">
+        <PrTb mn="0" nm="clientes" oe="1" sch="phpbar" zr="0"/>
+        <CdTb mn="1" nm="clifones" oe="1" sch="phpbar" zr="1"/>
+        <ClPr cdCl="fon_cliid" prCl="cli_id"/>
+      </Fk>
+      <Idx clu="0" nm="clifones_fon_cliid_Idx" unq="0">
+        <ClNs>fon_cliid</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="comanda_delivery">
+      <TblOpts/>
+      <Pk ClNs="del_id" nm="pkcomanda_delivery"/>
+      <Cl au="1" df="" nm="del_id" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="del_comid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+        <Cm>codigo da comanda</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="del_troco" nu="1">
+        <DT ds="Decimal" en="" id="3" ln="10" sc="2" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="del_ruaid" nu="1">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="del_fone" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="del_baiid" nu="1">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Bairro </Cm>
+      </Cl>
+      <Cl au="0" df="" nm="del_complemento" nu="1">
+        <DT ds="VarChar" en="" id="12" ln="50" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="del_obs" nu="1">
+        <DT ds="Text" en="" id="703" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Fk deAc="3" nm="fk_comanda_delivery_comandas" prLkCl="com_id">
+        <PrTb mn="0" nm="comandas" oe="1" sch="phpbar" zr="0"/>
+        <CdTb mn="1" nm="comanda_delivery" oe="1" sch="phpbar" zr="1"/>
+        <ClPr cdCl="del_comid" prCl="com_id"/>
+      </Fk>
+      <Idx clu="0" nm="comanda_delivery_del_baiid_Idx" unq="0">
+        <ClNs>del_baiid</ClNs>
+      </Idx>
+      <Idx clu="0" nm="comanda_delivery_del_ruaid_Idx" unq="0">
+        <ClNs>del_ruaid</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="comanda_itens">
+      <TblOpts/>
+      <Pk ClNs="cti_id" nm="pkcomanda_itens"/>
+      <Cl au="1" df="" nm="cti_id" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="cti_comid" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+        <Cm>Codigo da comanda</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="cti_proid" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="cti_obs" nu="1">
+        <DT ds="Text" en="" id="703" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Fk deAc="3" nm="fk_comanda_itens_comandas" prLkCl="com_id">
+        <PrTb mn="0" nm="comandas" oe="1" sch="phpbar" zr="0"/>
+        <CdTb mn="1" nm="comanda_itens" oe="1" sch="phpbar" zr="1"/>
+        <ClPr cdCl="cti_comid" prCl="com_id"/>
+      </Fk>
+      <Fk deAc="3" nm="fk_comanda_itens_produtos" prLkCl="pro_id">
+        <PrTb mn="0" nm="produtos" oe="1" sch="phpbar" zr="0"/>
+        <CdTb mn="1" nm="comanda_itens" oe="1" sch="phpbar" zr="1"/>
+        <ClPr cdCl="cti_proid" prCl="pro_id"/>
+      </Fk>
+      <Idx clu="0" nm="comanda_itens_cti_comid_Idx" unq="0">
+        <ClNs>cti_comid</ClNs>
+      </Idx>
+      <Idx clu="0" nm="comanda_itens_cti_proid_Idx" unq="0">
+        <ClNs>cti_proid</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="comandas">
+      <TblOpts/>
+      <Pk ClNs="com_id" nm="pkcomandas"/>
+      <Cl au="1" df="" nm="com_id" nu="0">
+        <DT ds="BigInt" en="" id="-5" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="com_mesid" nu="1">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>mesa</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="com_delivery" nu="1">
+        <DT ds="Char" en="" id="1" ln="1" sc="null" sg="1"/>
+        <Cm>Se é tele_entrega</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="com_dtcomanda" nu="0">
+        <DT ds="Date" en="" id="91" ln="null" sc="null" sg="1"/>
+        <Cm>data da Venda</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="com_vltotal" nu="0">
+        <DT ds="Numeric" en="" id="2" ln="12" sc="2" sg="1"/>
+      </Cl>
+      <Fk deAc="3" nm="fk_comandas_mesas" prLkCl="mes_id">
+        <PrTb mn="0" nm="mesas" oe="1" sch="phpbar" zr="0"/>
+        <CdTb mn="1" nm="comandas" oe="1" sch="phpbar" zr="1"/>
+        <ClPr cdCl="com_mesid" prCl="mes_id"/>
+      </Fk>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="funcionarios">
+      <TblOpts/>
+      <Pk ClNs="fun_id" nm="pkfuncionarios"/>
+      <Cl au="1" df="" nm="fun_id" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="fun_nome" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="85" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="fun_senha" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="50" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="fun_ativo" nu="0">
+        <DT ds="Char" en="" id="1" ln="1" sc="null" sg="1"/>
+      </Cl>
+      <Idx clu="0" nm="funcionarios_fun_ativo_Idx" unq="0">
+        <ClNs>fun_ativo</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="mesas">
+      <TblOpts/>
+      <Pk ClNs="mes_id" nm="pkmesas"/>
+      <Cl au="1" df="" nm="mes_id" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Codigo</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="mes_descr" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="50" sc="null" sg="1"/>
+        <Cm>Nome da Mesa</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="mes_local" nu="1">
+        <DT ds="Char" en="" id="1" ln="1" sc="null" sg="1"/>
+        <Cm>Local:</Cm>
+      </Cl>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="produtos">
+      <TblOpts/>
+      <Pk ClNs="pro_id" nm="pkprodutos"/>
+      <Cl au="1" df="" nm="pro_id" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>Código</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="pro_nome" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="85" sc="null" sg="1"/>
+        <Cm>nome do produto</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="pro_preco" nu="0">
+        <DT ds="Numeric" en="" id="2" ln="12" sc="2" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="pro_descr" nu="1">
+        <DT ds="Text" en="" id="703" ln="null" sc="null" sg="1"/>
+        <Cm>Descrição do Produto</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="pro_imagem" nu="1">
+        <DT ds="BLOB" en="" id="2004" ln="null" sc="null" sg="1"/>
+        <Cm>imagem do Produto</Cm>
+      </Cl>
+      <SchTrHis/>
+    </Tbl>
+    <Tbl UsSo="1" nm="produtos_itens">
+      <Cm>itens do produto</Cm>
+      <TblOpts/>
+      <Pk ClNs="ite_id" nm="pkprodutos_itens"/>
+      <Cl au="1" df="" nm="ite_id" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+      </Cl>
+      <Cl au="0" df="" nm="ite_proid" nu="0">
+        <DT ds="Integer" en="" id="4" ln="null" sc="null" sg="1"/>
+        <Cm>codigo do produto</Cm>
+      </Cl>
+      <Cl au="0" df="" nm="ite_produto" nu="0">
+        <DT ds="VarChar" en="" id="12" ln="85" sc="null" sg="1"/>
+        <Cm>Produto</Cm>
+      </Cl>
+      <Fk deAc="3" nm="fk_produtos_itens_produtos" prLkCl="pro_id">
+        <PrTb mn="0" nm="produtos" oe="1" sch="phpbar" zr="0"/>
+        <CdTb mn="1" nm="produtos_itens" oe="1" sch="phpbar" zr="1"/>
+        <ClPr cdCl="ite_proid" prCl="pro_id"/>
+      </Fk>
+      <Idx clu="0" nm="produtos_itens_ite_proid_Idx" unq="0">
+        <ClNs>ite_proid</ClNs>
+      </Idx>
+      <SchTrHis/>
+    </Tbl>
+  </Sch>
+  <Dgm nm="phpbar">
+    <RnCf FtSz="9" lkStgy="KeyToKeyStrategy" zm="1.0">
+      <VbCfg>
+        <Fg ky="Auto Number" vl="0"/>
+        <Fg ky="Check" vl="0"/>
+        <Fg ky="Comment" vl="0"/>
+        <Fg ky="Data Type" vl="1"/>
+        <Fg ky="Default" vl="0"/>
+        <Fg ky="ENUM Values" vl="0"/>
+        <Fg ky="Length" vl="1"/>
+        <Fg ky="Name" vl="1"/>
+        <Fg ky="Nullable" vl="0"/>
+        <Fg ky="Schema Name" vl="0"/>
+        <Fg ky="Signed" vl="0"/>
+      </VbCfg>
+    </RnCf>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="clientes" x="45" y="77"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="clifones" x="65" y="275"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="funcionarios" x="67" y="458"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="produtos" x="735" y="67"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="produtos_itens" x="746" y="188"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="mesas" x="408" y="187"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="comandas" x="409" y="277"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="comanda_itens" x="392" y="91"/>
+    <TbGl bkCl="ffffffe6" sch="phpbar" tbl="comanda_delivery" x="418" y="387"/>
+    <FkGl bkCl="ff000000" nm="phpbar.clifones.clifones_fon_cliid_fk"/>
+    <FkGl bkCl="ff000000" nm="phpbar.comanda_delivery.fk_comanda_delivery_comandas"/>
+    <FkGl bkCl="ff000000" nm="phpbar.comanda_itens.fk_comanda_itens_comandas"/>
+    <FkGl bkCl="ff000000" nm="phpbar.comanda_itens.fk_comanda_itens_produtos"/>
+    <FkGl bkCl="ff000000" nm="phpbar.comandas.fk_comandas_mesas"/>
+    <FkGl bkCl="ff000000" nm="phpbar.produtos_itens.fk_produtos_itens_produtos"/>
+  </Dgm>
+  <RnmMgr NxRnmId="4">
+    <RnmCh ObjCls="Table" ParCls="Schema" ParNme="phpbar" SupCls="" SupNme="">
+      <Rnm id="1" nNm="comandas" oNm="vendas"/>
+    </RnmCh>
+    <RnmCh ObjCls="Table" ParCls="Schema" ParNme="phpbar" SupCls="" SupNme="">
+      <Rnm id="2" nNm="comanda_itens" oNm="itens_venda"/>
+    </RnmCh>
+    <RnmCh ObjCls="Schema" ParCls="Database" ParNme="phpbar" SupCls="" SupNme="">
+      <Rnm id="3" nNm="phpbar" oNm="schemaA"/>
+    </RnmCh>
+  </RnmMgr>
+  <DbDocOptionMgr>
+    <BasicOptionMgr>
+      <Name>db.doc.option.mgr</Name>
+      <BoolOpt lbl="Diagrams" nm="doc.diagrams" on="1" spl="0"/>
+      <BoolOpt lbl="Foreign Keys" nm="doc.fks" on="1" spl="0"/>
+      <BoolOpt lbl="Indexes" nm="doc.indexes" on="1" spl="0"/>
+      <BoolOpt lbl="Overwrite CSS File" nm="doc.overwrite.css" on="1" spl="0"/>
+      <BoolOpt lbl="Procedures" nm="doc.procs" on="1" spl="0"/>
+      <BoolOpt lbl="Schemas" nm="doc.schemas" on="1" spl="0"/>
+      <BoolOpt lbl="Sequences" nm="doc.sequences" on="1" spl="0"/>
+      <BoolOpt lbl="Tables" nm="doc.tables" on="1" spl="0"/>
+      <BoolOpt lbl="Triggers" nm="doc.triggers" on="1" spl="0"/>
+      <BoolOpt lbl="Views" nm="doc.views" on="1" spl="0"/>
+    </BasicOptionMgr>
+  </DbDocOptionMgr>
+</Db>

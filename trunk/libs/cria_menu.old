@@ -1,0 +1,30 @@
+<?
+function cria_menu($usuario,$modulo){
+   $sqlpai = " select * from mnu_pai where mnu_modid=$modulo order by mnu_nome";
+   $rs = pg_query($sqlpai);
+   echo "<div class='menuBar' style='width:100%;position:absolute;left:0px;top:0px'>";
+   while ($ln = pg_fetch_array($rs)){
+      $m2 = $ln["mnu_nome"];
+      echo "<a class='menuButton'
+      onclick=\"return buttonClick(event,'".$ln["mnu_nome"]."');\"
+      onmouseover=\"buttonMouseover(event, '".$m2."');\">".$ln["mnu_nome"]."</a>";
+   }
+   $sqlmnu = "SELECT p.mnu_nome as pai, f.mnu_nome,mnu_arq
+	          from mnu_filho f inner join mnu_pai p on mnu_pai = mnu_paiid
+	          left outer join per_menus on mnu_id = mnu_filid
+			  where per_usuid = $usuario and mnu_mod = $modulo order by pai,f.mnu_nome";
+   $rsmnu = pg_query($sqlmnu);
+   echo "</div>";
+   while($lnmnu = pg_fetch_array($rsmnu)){
+	  if ($pai == $lnmnu["pai"]){
+	      echo "<a class='menuItem' href='".$lnmnu["mnu_arq"]."'>".$lnmnu["mnu_nome"]."</a>\n";
+	  }else{
+         echo "</div><div id='".$lnmnu["pai"]."' class='menu'
+         onmouseover=\"menuMouseover(event)\">\n";
+         echo "<a class='menuItem' href='".$lnmnu["mnu_arq"]."'>".$lnmnu["mnu_nome"]."</a>\n";
+      }
+		 $pai = $lnmnu["pai"];
+	}
+    echo "</div>";
+}
+?>

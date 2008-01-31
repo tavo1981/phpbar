@@ -1,0 +1,9 @@
+create table folha_afast(
+  faf_id serial not null primary key,
+  faf_carid integer  not null ,
+  faf_data date,
+  faf_ano char(4)
+);
+
+create index folha_afast_faf_carid on folha_afast(faf_carid);
+create index folha_afast_faf_ano  on folha_afast(faf_ano);

@@ -1,0 +1,194 @@
+div.menuBar {
+  cursor: default;
+  font-family:"MS Sans Serif", Arial, sans-serif;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: normal;
+  color: #000000;
+
+ }
+div.menu{
+  border: 1px solid #aca899;
+  padding: 2px;
+  background-color: #ffffff;
+  cursor: default;
+  z-index: 1000;
+  font: 12px "MS Sans Serif", Arial, sans-serif;
+  border-collapse: collapse;
+
+}
+
+div.menu table {
+  cursor: default;
+  font-size: 12px;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  border-collapse: collapse;
+
+}
+/*div.menu a tr.item td.icon img {
+  width: 18px;
+  height: 18px;
+}*/
+
+td.icon {
+  cursor: default;
+  padding: 1px 3px 1px 1px;
+  height: 18px;
+  background-color: #eeeee2;
+  
+}
+
+div.menu a tr.item td.label {
+   padding: 1px 1px 1px 1px;
+   
+
+}
+.icon{
+   width: 18px;
+   height: 18px;
+}
+div.menuBar {
+  background-color:#eeeee2;
+  /*background-color:#d0d0d0;*/
+  border: 1px solid;
+  border-color: #f0f0f0 #909090 #909090 #f0f0f0;
+  padding: 4px 2px 4px 2px;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+div.menuBar a.menuButton {
+  background-color: transparent;
+
+  color: #000000;
+  cursor: default;
+  left: 0px;
+  margin: 1px;
+  padding: 2px 6px 2px 6px;
+  position: relative;
+  text-decoration: none;
+  top: 0px;
+  z-index: 100;
+}
+
+div.menuBar a.menuButton:hover {
+  background-color: transparent;
+  border-color: #f0f0f0 #909090 #909090 #f0f0f0;
+  color: #000000;
+}
+
+div.menuBar a.menuButtonActive,
+div.menuBar a.menuButtonActive:hover {
+  background-color:#E0F0F7;
+  
+   border-color: #909090 #f0f0f0 #f0f0f0 #909090;
+  /*color: #ffffff;*/
+  left: 1px;
+  top: 1px;
+}
+
+div.menu {
+  background-color: #FFFFFF;
+  border: 2px solid;
+  border: 1px solid #aca899;
+  left: 0px;
+  padding: 2px 2px 2px 2px;
+  position: absolute;
+  top: 0px;
+  visibility:hidden;
+  z-index: 101;
+}
+
+div.menu a.menuItem {
+  color: #000000;
+  cursor: default;
+  display: block;
+  padding: 3px;
+  text-decoration: none;
+  white-space: nowrap;
+  border-left:8px solid #eeeee2
+}
+
+div.menu a.menuItem2 {
+  color: #000000;
+  cursor: default;
+  display: block;
+  padding: 3px;
+  text-decoration: none;
+  white-space: nowrap;
+
+}
+
+div.menu a.menuItem:hover, div.menu a.menuItemHighlight {
+  /*background-color: #619af5;*/
+  background-color:#FFE5B5;
+  /*color: #ffffff;*/
+  
+}
+
+div.menu a.menuItem:focus, div.menu a.menuItemHighlight tr.item td.icon{
+  background-color: #619af5;
+  color: #ffffff;
+}
+div.menu a.menuItem:focus div.menu tr.item td.icon{
+  background-color: #619af5;
+  color: #ffffff;
+}
+div.menu a.menuItem:focus{
+    /*background-color: #619af5;*/
+    background-color:#FFE5B5;
+    color: #000000;
+}
+div.menu a.menuItem span.menuItemText {}
+
+div.menu a.menuItem span.menuItemArrow {
+  margin-right: -0.5em;
+}
+
+div.menu div.menuItemSep {
+  border-top: 1px solid #909090;
+  border-bottom: 1px solid #f0f0f0;
+  margin: 4px 2px;
+}
+
+div.menu tr.item:hover  {
+  background-color: #FFE5B5;
+  border: 1px solid black;
+  
+}
+div.menu tr.item:focus td.label {
+  background-color: #619af5;
+  
+}
+div.menu tr.item:hover td.label a.menuItem{
+  color: #ffffff;
+}
+div.menu tr.item:focus td.label a.menuItem{
+  color: #ffffff;
+}
+div.menu tr.item:hover,div menu tr.item:focus {
+ border-color:#316ac5;
+ padding:1px 1px 1px 1px;
+}
+div.menu tr.item:hover td.icon,
+div.menu tr.item:focus td.icon {
+  background-color: #619af5;
+  color: #ffffff;
+}
+ tr.separator td div {
+  border-top: 1px solid #aca899;
+  overflow: hidden;
+  position: relative;
+}
+ tr.separator td {
+  padding: 2px 0px;
+}
+
+ tr.separator td.icon div {
+  margin-left: 3px;
+  border-top: 1px solid #aca899;
+}
+
+ tr.separator td.label div {
+  margin-right: 3px;
+}
