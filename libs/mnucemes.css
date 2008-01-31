@@ -1,0 +1,41 @@
+/* Copyright Dynarch.com, 2003-2005.  All Rights Reserved. */
+
+@import url("hmenu-extended.css");
+
+div.dynarch-horiz-menu { padding: 1px; }
+div.dynarch-horiz-menu table tr td.hover { padding: 2px 9px; border: 1px solid; }
+div.dynarch-horiz-menu table tr td.active,
+div.dynarch-horiz-menu table tr td.pressed { padding: 3px 8px 1px 10px; border: 1px solid; }
+
+/* horizontal parts */
+
+div.dynarch-horiz-menu { background-color: #EEEEE2; color: #000; border-color: #aca899; }
+div.dynarch-horiz-menu table { color: #000; }
+div.dynarch-horiz-menu table tr td.hover { background: url("img/longhorn/bar-hover-bg.png") repeat-x 0 0; 
+                                           border-color: #dfe2e5; }
+div.dynarch-horiz-menu table tr td.active {background: url("img/longhorn/bar-hover-bg.png") repeat-x 0 0;
+ border-color: #dfe2e5;}
+div.dynarch-horiz-menu table tr td.pressed {background: url("img/longhorn/bar-hover-bg.png") repeat-x 0 0; border-color: #dfe2e5;
+     padding: 3px 2px 1px 4px; }
+div.dynarch-horiz-menu table tr td.hover table,
+div.dynarch-horiz-menu table tr td.active table { color: #fff; }
+div.dynarch-horiz-menu table tr td.separator div { border-left-color: #9d98bf; border-right-color: #fff; }
+
+
+/* vertical parts */
+
+div.dynarch-popup-menu div.d div.c div.b div.a { padding: 2px 1px; }
+div.dynarch-popup-menu { border-color: #4e5358; color: #000;  padding: 0; }
+div.dynarch-popup-menu tr.item td { height: 21px;background-color: #FFF; }
+div.dynarch-popup-menu tr.item td.icon { padding: 1px 1px 1px 3px; background-color: #EEEEE2; }
+div.dynarch-popup-menu tr.item.hover, div.dynarch-popup-menu tr.item.active { 
+ 
+}
+div.dynarch-popup-menu tr.item.hover td, div.dynarch-popup-menu tr.item.active td {
+   background-color:#E0F0F7;
+   border-color: #aadaed;
+}
+div.dynarch-popup-menu tr.active td.arrow div { color:#000; }
+div.dynarch-popup-menu tr.item.hover td.icon, div.dynarch-popup-menu tr.item.active td.icon {
+  padding-left: 2px;
+}

@@ -1,0 +1,1154 @@
+<?
+ /*
+  Classe form -> Classe para criar formularios html;
+  Versão      2.0
+  data        25/04/2004
+  creditos    Iuri Andrei Guntchnigg
+  Licença     GPL  Essa classe pode ser distribuido e modificado livremente,
+                   desde que os creditos sejam mantidos ;
+
+ */
+ class form {
+
+     var $frm_nome;                           #nome do form
+     var $metodo        = "post";             #metodo padrão do form
+     var $iframe        = false;              #true ira criar o iframe.
+     var $css           = "estilos.css"; #local do arquivo com as definições das regras css
+     var $fechar        = false;
+     var $mostra_iframe = false;
+     var $frame         = false;
+     var $focus         = null;
+     var $dblibs        = "libs";
+     var $pickcolor     = false ;
+     var $if_width      = 700;
+     var $if_heigth     = 350;
+     var $_tnumbers     = array("float","integer","numeric","bigint","bytea");
+
+      /*função para dar criar um erro e cancelar a execução
+      $mensagem = mensagem de erro voltada par ao usuário */
+      function erro($mensagem){
+
+          die("<b>FORM Erro -></b>".$mensagem);
+      }
+
+       /*cria a tag <tr> caso $fecha = true, se for false fecha a tag*/
+
+     function linha($mostra,$mostra2=false){
+
+         if ($mostra == true){
+            echo "\n<tr>\n";
+         }elseif ($mostra == false){
+           echo "\n</tr>\n";
+         }else if ($mostra != true or $mostra != false){
+            $this->erro("Funcao linha Deve receber <b>'true'</b> ou <b>'false'</b>");
+         }
+         if ($mostra2 == true ){
+             $this->linha(true);
+         }
+     }
+
+     function AbreCelula($label="",$ajuda="",$id=''){
+
+        echo "<td id='$id' title='$ajuda' style='text-align:right' nowrap><b>$label</b></td><td valign='center' title='$ajuda' nowrap >\n";
+     }
+
+     function FechaCelula(){
+        echo "\n</td>\n";
+     }
+     function form ($javascript="",$cabecalho=true,$dlibs="libs",$menu=true,$height=40){
+         if ($dlibs != null){
+             $this->dblibs = $dlibs;
+             
+          }
+          if ($menu == true){
+              $fc_menu = "initPage();";
+          }else{
+              $fc_menu = '';
+          } 
+          //echo "<script>alert('$fc_menu')</script>";
+          if ($cabecalho == true){
+                     echo "<html>\n"
+                ."<head>\n"
+                ."<title></title>\n"
+                ."<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-1'>\n"
+                ."<link rel='stylesheet' href='".$dlibs."/".$this->css."' type='text/css' media='all'>\n"
+                ."<link rel='stylesheet' href='$dlibs/menuw.css' type='text/css' media='all'>\n"
+                ."<link rel='stylesheet' href='libs/mnucemes.css' title='XP Extended' />"
+                ."<SCRIPT LANGUAGE='JavaScript' SRC='$dlibs/menuw.js'></SCRIPT>\n"
+                ."<script type='text/javascript' src='$dlibs/hmenu.js'></script>"
+                ."<script type='text/javascript' src='$dlibs/prototype.js'></script>"
+                ."<script language='JavaScript' src='$dlibs/funcoes.js'></script>\n"
+                               ."<script>\n"
+                               .$javascript
+                               ."</script>\n"
+                ."</head>\n"
+                ."<body id='xfdge' style='margin-right:0;' bgcolor='".$_SESSION["bgcolor"]."' onload='winInit();setfocusonload(); $fc_menu'
+                        oncontextmenu='menu_dir(event.clientY,event.clientX,event);return false'>\n"
+                ."<table>\n"
+                ."<tr height='$height'><td>&nbsp;</td></tr>\n"
+                ."</table>\n"
+                               ."<center>\n";
+        }
+  }
+
+            /**
+             * Cria a Estrutura do formulário 
+             *
+             * @param string $nome
+             * @param string $metodo
+             * @param string $acao
+             * @param string $funcao
+             * @param string $enctype
+             * @param string $frame
+             * @param string $titulo
+             * @return Object
+             */
+            function MakeForm ($nome,$metodo,$acao="",$funcao="",$enctype="",$frame=true,$titulo=""){
+
+         $this->frm_nome = $nome;
+         echo "<table cellspacing='0' border=0 >\n";
+         echo "<form name=\"$nome\" method=\"$metodo\" action=\"$acao\" "
+                ."enctype='$enctype' id='$nome'"
+                ."$funcao>\n";
+         if ($frame == true){
+             $this->append("<td valign='top'><fieldset><legend><b>$titulo</b></legend><table>");
+             $this->frame = true;
+
+
+         }
+     }
+
+     /**cria uma caixa de texto simples.
+      label     = label do campo
+      nome      = Nome do campo
+      maxlength = tamanho maximo de caracteres
+           tamanho   = tamanho da caixa de texto na pagina
+           ajuda     = cria um tool tip text de ajuda ao usuario
+           valida    = parametros para validacao de entrada de dados no campo
+                       A = Converte o que está sendo digitado para maisculas
+                                   E = o campo não aceita nulos
+                                      N = Aceita apenas Numeros
+                  R = Coloca como Read Only
+           Valor     = valor da caixa de text0
+     
+     * @return Object
+     * @param string $label
+     * @param string $name
+     * @param integer $maxlength
+     * @param integer  $tamanho
+     * @param string  $ajuda
+     * @param string  $valida
+     * @param string $valor
+     * @param string $fc
+     
+     */
+
+     function FrmInput($label, $name,$maxlength="0",$tamanho,$ajuda,$valida="",$valor="",$fc="",$cel=1){
+         $style=null;
+         if ($cel==1){
+         	$this->AbreCelula($label,$ajuda,"lbl$name");
+         }
+         echo "<input type='text' name=\"$name\" onfocus=\"statusbar('$ajuda');\""
+                ."size='$tamanho'"
+                ."title='$label'"
+                ."id='$name'";                
+         if ($maxlength != 0){
+             echo "maxlength='$maxlength' ";
+         }                    
+         if ($valida != ""){
+         	 if (strpos($valida,"[")){
+         	    $str       = substr($valida,strpos($valida,"[")+1,strpos($valida,"]")-1);
+         	 	$keyPress .= "return pressKey(event,'$str');";
+         	 }
+         	 if ($str){
+         	 	$valida = str_replace($str,'',$valida);
+         	 }
+         	 $parm = strlen($valida);
+             for ($i = 0;$i < $parm;$i++){
+                             if ($i == $parm ){
+                                    $tag = ">";
+                                 }
+                 $fcn = substr($valida,$i,1);
+                 if ($fcn == "A"){
+                    echo "\nonkeyUp=\"c_maiuscula(this)\"".$tag;
+                 }else if($fcn == "E"){
+                    echo "\nclass=\"nnulo\"";
+                 }else if($fcn =="N"){
+                   // $keyPress .= "return teclas(event);";
+                 }else if($fcn =="R"){
+                    echo "\nreadonly\"";
+                    $style= " background-color:#E6E6E6";
+                 }else if($fcn =="P"){
+                    echo "\nonBlur=\"chkcnpj(this)\" \"";
+                 }else if($fcn =="F"){
+                    echo "\nonBlur=\"chkcic(this)\" \"";
+                 }      
+             }
+           }
+          
+           $rs = @pg_query("SELECT distinct attname, pg_catalog.format_type(atttypid,  atttypmod)  as tipo from pg_attribute where attname = '$name' and  attnum > 0   AND NOT attisdropped");
+           $type = ereg_replace("[0-9]|[(,)]",'',@pg_result($rs,"0",1));           
+           if (in_array($type,$this->_tnumbers)){
+           	
+           		$style .= " ;text-align:right;";
+           		if (ereg(",0)",@pg_result($rs,"0",1))){
+           			
+           			$onkeydown = "";
+           			
+           		}else if (ereg("(,)",@pg_result($rs,"0",1))){
+           			
+           			 $onkeydown = "onkeydown='Formata(this,12,event,2)'";
+           			 //messagebox($valor);
+           			 $valor = number_format($valor,2,",",".");
+           			
+           		}
+           		$keyPress .= "return pressKey(event,'0-9');";
+           	
+           }
+           
+           echo "style='$style' $fc $onkeydown";
+           echo "value=\"$valor\"\n";
+           if ($keyPress){
+           	  echo "onKeyPress=\"$keyPress\"";
+           }
+           echo ">";
+           
+           if ($cel == 1){
+           	   $this->FechaCelula();
+           }
+
+     }
+
+     /*cria uma caixa de senha
+      label     = label do campo
+      nome      = Nome do campo
+      maxlength = tamanho maximo de caracteres
+           tamanho   = tamanho da caixa de texto na pagina
+           ajuda     = cria um tool tip text de ajuda ao usuario
+           valida    = parametros para validacao de entrada de dados no campo
+                       A = Converte o que está sendo digitado para maisculas
+                                   E = o campo não aceita nulos
+                                      N = Aceita apenas Numeros
+           Valor     = valor da caixa de text0
+     */
+
+     function FrmSenha($label, $name,$maxlength="0",$tamanho,$ajuda,$valida="",$valor=""){
+
+         $this->AbreCelula($label,$ajuda,"lbl$name");
+         echo "<input type='password' name=\"$name\" maxlength='$maxlength' onfocus=\"statusbar('$ajuda');\"
+                 onblur=\"statusbar('&nbsp;')\""
+               ."size='$tamanho'"
+               ."title='$label'"
+               ."class='input'"
+               ."value=\"$valor\"";
+         if ($valida != ""){
+             $parm = strlen($valida);
+             for ($i = 0;$i < $parm;$i++){
+                 if ($i == $parm ){
+                     $tag = ">";
+                 }
+                 $fcn = substr($valida,$i,1);
+                 if ($fcn == "A"){
+                    echo "\nonkeyUp=\"c_maiuscula(this)\"".$tag;
+                 }else if($fcn == "E"){
+                    echo "\nclass=\"nnulo\"".$tag;
+                 }elseif($fcn =="N"){
+                    echo "\nonKeyPress=\"return teclas(event);\"".$tag;
+                 }
+             }
+             $this->FechaCelula();
+         }
+
+     }
+     function FrmInputFile($label, $name,$ajuda="",$valor=""){
+
+         $this->AbreCelula($label,$ajuda,"lbl$name");
+         echo "<input type='file' id='$name' title='$label'
+                 name=\"$name\" onfocus=\"statusbar('$ajuda');\"
+                 onblur=\"statusbar('&nbsp;')\">";
+              ;
+          $this->FechaCelula();
+     }
+
+     /*cria uma caixa de texto simples.
+      label     = label do campo
+      nome      = Nome do campo
+      maxlength = tamanho maximo de caracteres
+           tamanho   = tamanho da caixa de texto na pagina
+           ajuda     = cria um tool tip text de ajuda ao usuario
+           valida    = parametros para validacao de entrada de dados no campo
+                       A = Converte o que está sendo digitado para maisculas
+                                   E = o campo não aceita nulos
+                                      N = Aceita apenas Numeros
+                  R = ReadOnly
+      Valor     = valor da caixa de text0
+     */
+
+     function FrmTextArea($label, $name,$altura,$largura,$style="",$ajuda,$valida="",$valor="",$function=''){
+
+         $this->AbreCelula($label,$ajuda,"lbl$name");
+         echo "<textarea name=\"$name\"  cols=$altura rows=$largura"
+              ." title='$label' onfocus=\"statusbar('$ajuda');\"
+                 onblur=\"statusbar('&nbsp;')\""
+              ." style='".$style."' "
+              ."  id='$name'
+               $function \n";
+         if ($valida != ""){
+             $parm = strlen($valida);
+             for ($i = 0;$i < $parm;$i++){
+                 if ($i == $parm ){
+                     $tag = ">";
+                 }
+                 $fcn = substr($valida,$i,1);
+                 if ($fcn == "A"){
+                    echo "\nonkeyUp=\"c_maiuscula(this)\"";
+                 }else if($fcn == "E"){
+                    echo "\nclass=\"nnulo\"";
+                 }elseif($fcn =="N"){
+                    echo "\nonKeyPress=\"return teclas(event);\"";
+                 }elseif($fcn =="R"){
+                    echo "readonly  style='background-color:#E6E6E6'";
+                 }   
+             }
+         }
+         echo ">$valor\n</textarea>\n";
+         $this->FechaCelula();
+     }
+     /*função para criar um select a partir de um array ou de
+     dados vindo de uma tabela do banco de dados
+     $label = Label do campo
+     $nome  = Nome do campo
+     $db    = indica se os dados viram de umtabela do banco de dados ou array
+             true  = banco de dados
+             false = array
+     $tabela = se $db = true recebe o nome da tabela, se não passe a array com os valores
+     $chave  = apenas se usa quando $db for true indica qual campo sera o value dos combo
+     $valor  = apenas se usa quando $db for true indica qual o valor aparece para o usuario
+     $ajuda  = mostra uma tool tip de ajuda para o ajuario
+     $size   = tamnho do select padrão -1 (mostra como um combo, se for maior mostra com um list
+     $valida = se for true mostra o traz o combo o com valor validado
+     $valorcop = valor para ser comparado
+     $func     = função a ser executada
+     */
+
+     function FrmSelect($label,$nome,$db=false,$tabela,$chave="", $valor="", $ajuda="" ,$size="-1",$valida=false,$valorcop="",$func="",$cel=1,$w='',$wh=''
+     ,$ord=''){
+         if ($cel == 1){
+            $this->AbreCelula($label,$ajuda,"lbl$nome");
+         }
+         if ($w != ""){
+             $tam = "style='width:$w'";
+         }
+         echo "<select name='".$nome."' size='".$size."' $tam title='$label' $func  onfocus=\"statusbar('$ajuda');\"
+                 onblur=\"statusbar('&nbsp;')\" id='$nome' \n";
+         if ($valida != ""){
+             $parm = strlen($valida);
+             for ($i = 0;$i < $parm;$i++){
+                 if ($i == $parm ){
+                     $tag = ">";
+                 }
+                 $fcn = substr($valida,$i,1);
+                 if ($fcn == "A"){
+                    echo "\nonkeyUp=\"c_maiuscula(this)\"";
+                 }else if($fcn == "E"){
+                    echo "\nclass=\"nnulo\"";
+                 }elseif($fcn =="N"){
+                    echo "\nonKeyPress=\"return teclas(event);\"";
+                 }elseif($fcn =="R"){
+                    echo "disabled  style='background-color:#E6E6E6'";
+                 }   
+             }
+         }
+         echo ">";
+         if  ($size == "-1"){
+              echo  " <option value=''>Selecione</option>\n";
+             }
+
+         if ($db == true){
+         	if ($ord != ''){
+         		
+         		$order = " ".$ord;
+         	}else {
+         		
+         		$order = $valor;
+         		
+         	}
+         	 $sql = "select $chave,$valor from $tabela $wh order by $order	";
+         	 echo $sql;
+             $rs = pg_query($sql);
+             while ($lnpar = pg_fetch_Array($rs)){
+
+                if ($valida == true){
+
+                    if ($valorcop == $lnpar[0]){
+                       $sel = "selected";
+                    }else{
+                       $sel = null;
+                    }
+
+                }else{
+                        $sel = null;
+                    }
+                echo "<option value='".$lnpar[0]."'$sel>".$lnpar[1]."</option>\n";
+             }
+          }else{
+             while (list($k,$v) = each($tabela)){
+                if ($valorcop != ""){
+                   if ($valorcop == $k){
+                       $sel = "selected";
+                    }else{
+                       $sel = null;
+                    }
+
+                }else{
+                        $sel = null;
+                    }
+                echo "<option value='".$k."' $sel>".$v."</option>\n";
+             }
+         }
+         echo "</select>";
+        // echo "<pre>".print_r($tabela)."</pre>";
+         
+         if ($cel == 1){
+            $this->FechaCelula();
+         }
+      }
+
+      /* função para criar uma caixa de para a escolha d datas
+
+       label     = label do campo
+       nome      = Nome do campo
+       tamanho   = tamanho da caixa de texto na pagina
+            ajuda     = cria um tool tip text de ajuda ao usuario
+            valida    = parametros para validacao de entrada de dados no campo
+                        N = Aceita apenas Numeros
+            Valor     = valor da caixa de text0
+     */
+
+      function FrmData($label, $name,$ajuda="",$valida="",$valor="",$cel=1,$function='',$status=1){
+            
+           $mimg     = true; 
+           $fcstatus = '';
+           if ($cel == 1){
+              $this->AbreCelula($label,$ajuda,"lbl$name");
+           }           
+           if (strpos($function,"onblur") > -1  ){
+           	
+           	 $onblur = str_replace("onblur=","",$function);
+           	 $onblur = str_replace("\"","",$onblur);
+           	 $function = "";
+           	 
+           }
+           if ($status == 1){
+           	 
+           	 $fcstatus=" statusbar('&nbsp;');"; 
+           }
+           
+           echo "<input type='text' name='$name'  id='$name'\n onfocus=\"statusbar('$ajuda');\"
+                 onblur=\"$onblur; $fcstatus\" $function"
+                 ."maxlength='10' onkeydown='FormataData(this,event)' onkeyPress=\"return pressKey(event,'0-9')\"\n";
+           if (isset($valor)){
+             echo   "value='$valor' ";      
+           }  
+           if ($valida != ""){
+               $parm = strlen($valida);
+               for ($i = 0;$i < $parm;$i++){
+                    if ($i == $parm ){
+                        $tag = ">";
+                    }  
+                    $fcn = substr($valida,$i,1);
+                    if ($fcn == "A"){
+                        echo "\nonkeyUp=\"c_maiuscula(this)\"";
+                    }else if($fcn == "E"){
+                        echo "\nclass=\"nnulo\"";
+                    }elseif($fcn =="N"){
+                        echo "\nonKeyPress=\"return teclas(event);\"";
+                    }elseif($fcn =="R"){
+                        echo "readonly  style='background-color:#E6E6E6'";
+                        $mimg = false;
+                    }   
+                }
+           }
+           
+           echo  "title='$label' size=11 style='$style'>";
+           if ($mimg == true){
+               echo " <img src='".$this->dblibs."/show-calendar.gif'id='img_$name'
+                     onClick=\"show_calendar('".$this->frm_nome.".".$name."');\"
+                    width=18 height=16 border=0 title='escolha a data' style='cursor:pointer'>\n";
+           }    
+           if ($cel == 1){
+              $this->FechaCelula();
+          }
+      }
+
+    /* cria um botão para fazer consultas em outros arquivos
+       $caption = Caption do botão
+       $nome    = Nome do botao
+       $alvo    = arquivo que recebera os dados para consulta
+       $ajuda   = ajuda ao usuario
+    */
+
+    function FrmBtnConsulta($caption,$nome,$alvo,$ajuda=""){
+
+         echo "<input type='submit' name='$nome' value='$caption' class='botao'"
+             ."onclick=\"document.".$this->frm_nome.".action='".$alvo."';document.".$this->frm_nome.".submit();\">";
+
+    }
+
+     function frmBtnDel($caption,$arq,$var,$id){
+
+         echo "<input type='button' name='btndel' value='$caption' class='botao'"
+             ."onclick=\"if (confirm('Confirma exclusão?')==true)location.href='$arq?$var=$id'\">";
+
+    }
+
+    /* cria um botão para fazer consultas em outros arquivos
+       $caption = Caption do botão
+       $nome    = Nome do botao
+       $acao    = pode receber funções javascript, para responder as ações do usuario
+       $tipo    = tipo do botao pode ser
+                  submit  = cria um botão para enviar os dados para o servidor
+                  button  = cria um botão simples.
+    */
+
+    function FrmButton($caption,$nome,$acao,$tipo="submit",$ak="",$c=false,$enabled=true,$accel=""){
+        if ($c == true){
+           echo "<td>";
+        }
+        $disabled = $enabled?true:"disabled";
+        $caption=str_replace($ak,"<u>".$ak."</u>",$caption);
+        if ($ak != ""){
+           $title = "Tecla de Atalho:'ALT + ".strtoupper($ak)."'";
+        } 
+        if ($accel !=""){        	
+        	
+        	$tag = "";
+        }else{
+        	
+        	if ($nome =="btncadastrar"){
+        		
+        		$tag = "<img src='libs/imagens/gtk_ok.png' border=0>";
+        		
+        	}elseif ($nome == "btnalterar"){
+        		
+        		$tag = "<img src='libs/imagens/gtk_refresh.png' border=0>";      		
+        	}elseif ($nome == "btnlimpar"){
+        		
+        		$tag = "<img src='libs/imagens/gtk_clear.png' border=0>";   
+        		
+        	}elseif ($nome == "btnconsultar"){
+        		
+        		$tag = "<img src='libs/imagens/gtk_find.png' border=0>";   
+        		
+        	}
+        	
+        }
+       // $tag = "<img src='libs/imagens/button_ok.png' border=0>";
+        echo "<button  $disabled accesskey='$ak' type='$tipo' name='$nome' class='botao'"
+             ."$acao title=\"$title\" id='$nome'>$tag $caption</button>";
+        if ($c == true){
+           echo "</td>";
+        }
+    }
+     /*cria um conjunto de Radios box.
+     */
+    function FrmRadio ($caption,$name,$itens,$ajuda='',$valida=false,$value='',$fc="",$fr=true,$br = ''){
+
+         if (!is_array($itens)){
+             $this->erro(":frm_radio->Parametro item deve ser uma array!");
+         }
+        
+         if ($fr == true){
+             $this->append("<td><fieldset style='text-align:center'><legend>$caption</legend>");
+         }else{
+             $this->AbreCelula($caption,$ajuda,"lbl$name");
+         }
+         $i = 0;
+         if ($br != ""){
+         	echo "<table><tr><td>";
+         }
+         	
+         while (list($k,$v) = each($itens)){
+               if ($k == $value){
+                    $sel = "checked";
+                }else{
+                    $sel = null;
+                }
+                 if ($br != ''){
+                	
+                	if ($i != 0){
+                		if ($i % $br == 0){
+                			$tbr = "</td></tr><tr><td>";
+                		}else{
+                			$tbr = '<td>';
+                		}
+                	}
+                		
+               	}
+                echo "$tbr<input type='radio' id='radio$name$k' name='$name' onfocus=\"statusbar('$ajuda');\"
+                onblur=\"statusbar('&nbsp;')\" value='".$k."' $sel $fc><label for='radio$name$k'>".$v."</label>\n";
+                $i++;
+        }
+        if ($br != ''){
+        	echo "</td></tr></table>";	
+        }
+        if ($fr == true){
+            $this->append("</fieldset></td>");
+        }
+        $this->FechaCelula();
+    }
+
+    /*cria um conjunto de caixa de texto que passado um valor chave, ira
+      consultar no banco de dados, e possibilita o usuario abrir uma tela para
+      pesquisar os dados
+      não usar mais - usar o metodo frm_dbconsulta;
+    */
+
+    function fecha_form(){
+       if ($this->frame == true){
+         $this->append("</table></td></fieldset>");
+       }
+            $this->fechar = true;
+            echo "</table>\n";
+            echo "</form>\n";
+    }
+
+   /**
+     * @return void
+     * @desc Termina a descrição do form 
+     */
+     function fecha(){
+       
+       if ($this->fechar != true){
+          if ($this->frame == true){
+             $this->append("</table></td></fieldset>");
+          }
+          echo "</table>\n";
+          echo "</form>\n";
+       }
+       echo "</center>\n".
+            "</body>\n".
+            "</html>\n";
+       if ($this->focus != null){
+          echo "<script>document.".$this->frm_nome.".".$this->focus.".focus();</script>";
+
+       }
+       if ($this->iframe == true ){
+          echo "<div id='janela' class='window' style=left:10px;top:40px;width:".$this->if_width.";heigth:".$this->if_heigth."px;zindex:150'>\n"
+               ."<div class='titleBar'>\n"
+               ."<span class='titleBarText' id='titulo'>Consultando</span>\n"
+               ."<img class='titleBarButtons' alt='' src='".$this->dblibs."/imagens/buttons.gif' usemap='#sampleMap1' />\n"
+               ."<map id=sampleMap1' name='sampleMap1'>\n"
+               ."<area shape='rect' coords='0,0,15,13'  href='' alt='' title='Minimize'
+                onclick=\"this.parentWindow.minimize();return false;\" />\n"
+               ."<area shape='rect' coords='16,0,31,13' href='' alt=' title='Restore'
+                onclick=\"this.parentWindow.restore();return false;\" />\n"
+               ."<area shape='rect' coords='34,0,49,13' href='' alt=' title='Close'
+                onclick=\"this.parentWindow.close();return false;\" />\n"
+               ."</map>\n"
+               ."</div>\n"
+               ."<div class='clientArea' style='height:".$this->if_heigth."px;background-color:#cccccc'>\n"
+               ."<iframe name='if_janela' width='100%' height='100%'frameborder=0></iframe>\n"
+               ."</div>\n"
+               ."</div>\n";
+           //."<iframe name='consulta' width=350 height=350 ></iframe>\n";
+       }
+       $this->mkpickColor();
+    }
+    //Adiciona o html que for passado a funcao
+    /**
+     * permite adicionar tags HTML.....
+     *
+     * @param unknown_type $html
+     */
+    function Append($html){
+       echo $html;
+    }
+    
+    //cria um separador  
+    function Separador($cols=7){ 
+      echo "<td colspan='$cols'>";
+      echo "<hr>";
+      echo "</td>";
+    }
+    
+    //seta o focus no objeto passado como parametro
+    function SetFocus($obj){
+       $this->focus = $obj;
+
+    }
+    #function checkbox
+    #cria um conjunto de checkbox dentro de um frame
+    #parametros:
+    #    checkbox [array['label','name','checked',value $itens,$function],Bolean[$frame],$orientation];  
+    function checkbox ($itens,$frame=true,$label="",$orientation="H"){
+       $orientation = strtolower($orientation); 
+       if (!is_array($itens)){
+          $this->erro("<b>Erro:</b> Parametro <b>'Itens'</b> deve ser um array"); 
+       }else{
+          echo "<td colspan='3'>";
+          if ($frame == true){
+              echo "<fieldset><legend>".$label."</legend>";
+          }       
+          for($i = 0 ; count($itens) > $i; $i++){
+             echo "<input type='checkbox' value='"
+                   .$itens[$i]["valor"]."'name='"
+                   .$itens[$i]["name"]."' ".$itens[$i]["check"]."
+                   id='".$itens[$i]["name"]."'
+                   ".$itens[$i]["function"]."><b>"
+                   .$itens[$i]["label"]."\n";
+          }
+           if ($frame == true){
+              echo "</fieldset>";
+           }
+           echo  "</tr>";                 
+       }
+    }
+    /* @desc cria uma funçao de consulta ao banco.. onde a resulta aparece ao digitar ...
+    /**
+        * @return void
+        * @param string $label  = Caption do campo
+        * @param string $Cchave = Nome do campo que ira receber o valor chave
+        * @param string $Cvalor = Nome do campo que ira receber o valor "valor"
+        * @param string $Ttable = Nome da Tabela;
+        * @param string $Tkey   = Nome do campo chave da tabela ( ou campo que sera a referencia);
+        * @param string $Tvalue = Nome do campo valor da tabela;
+        * @param string help    = descriçao de ajuda para os usuarios
+        * @param string $Vkey   = Valor do campo $Cchave(pode ser ser nulo);
+        * @param string $Vvalue = Valor do campo $Cvalor(pode ser ser nulo); 
+        
+        */
+    function FrmDbCombo($label,$Cchave,$Cvalor,$Ttable,$Tkey,$Tvalue,$help="",$Vkey="",$Vvlue=""){
+      $rs = pg_query("select $Tkey,$Tvalue from $Ttable order by $Tvalue");
+      echo "<script>";
+      $i = 0;
+      //escrevendo a array com os dados....
+      echo "dados = new Array()\n";
+      while ($ln = pg_fetch_array($rs)){
+          echo "dados[$i] = \"".$ln[0]."-".$ln[1]."\";\n";
+          $i++;
+           
+      }
+      ?>
+      function busca_array(direto){
+      document.getElementById("aqui").innerHTML=""
+      var texto  = document.<?=$this->frm_nome.".".$Cvalor?>;
+      var codigo = document.<?=$this->frm_nome.".".$Cchave?>;
+      if (direto == false){
+         if (texto.value.length != 0 && codigo.value == ""){
+            for (i = 1; i < dados.length;i++){
+                cod = dados[i].split("-"); 
+               if (cod[1].toLowerCase().indexOf(texto.value) != "-1"){
+                   document.getElementById("aqui").style.visibility="visible";
+                   document.getElementById("aqui").innerHTML+="<a style='cursor:pointer' onclick=\"js_completa(document.<?=$this->frm_nome.".".$Cchave;?>,document.<?=$this->frm_nome.".".$Cvalor;?>,'"+cod[0]+"','"+cod[1]+"');\">"+cod[1]+"</a><br>";
+                }
+            }
+         }else{
+           document.getElementById("aqui").innerHTML="";
+           document.getElementById("aqui").style.visibility="hidden";
+         }   
+        }else{
+           if (codigo.value != ""){
+             for (i = 1; i < dados.length;i++){
+                cod2 = dados[i].split("-"); 
+               if (cod2[0].substring(0,codigo.value.length) == codigo.value){
+                   document.getElementById("<?=$Cvalor;?>").value=cod2[1];
+               }
+            }   
+        
+          }
+        } 
+    }    
+    function js_completa(Cchave,campo,chave,valor){
+         Cchave.value = chave;
+         campo.value = valor;
+         document.getElementById("aqui").innerHTML="";
+         document.getElementById("aqui").style.visibility="hidden";
+    }
+    
+    function XY(x,y,layer){
+      // alert(x+"/"+y);
+       document.getElementById(layer).style.top=eval(y+10)+"px";
+       document.getElementById(layer).style.left=eval(x-10)+"px";
+   }   
+      </script>
+      
+      <?
+      
+      echo "<td ><b>$label</b></td><td>";
+      echo "<input type='text' name='$Cchave' id='$Cchave'size='5' class='nnulo' onBlur='busca_array$nome_div(true)'>";
+      echo "<input type='text' name='$Cvalor' id='$Cvalor' size='30'onclick=\"XY(event.clientX,event.clientY,'aqui')\" onKeyUp='busca_array$nome_div(false)' class='input';\">
+      
+<div id='aqui' 
+   style='position:absolute;width:300px;border:1px solid #999999; max-height:40px;overflow:auto; visibility:hidden;background-color:#eeeeee'>
+</div>
+</td>
+  "; 
+  
+  }
+  /**
+        * @return void
+        * @param string  $label 
+        * @param string  $Ttable
+        * @param string  $Tkey  
+        * @param string  $Tvalue 
+        * @param string  $fc    
+        * @param string  $ajuda 
+        * @combo boolean $combo 
+        * @param string  $val1  
+        * @param string  $val2  
+        * @desc cria uma funçao de consulta ao banco.. onde a resulta aparece ao digitar ...
+        
+  
+  */
+  
+  function FrmDbConsulta($label,$Ttable,$Tkey,$Tvalue,$fc,$ajuda="",$combo=false,$val1='',$val2='',$active=1,
+  $wh='',$fc_dir='',$valida='',$cel=1,$suffix=''){
+      if ($active == 1 ){
+       	  $mactive = "";
+       }else{
+       	  $mactive = "readonly";
+       }
+       $arq = $fc_dir ==''?'fc_ajax.php':$fc_dir;
+       if ($cel == 1){	  	
+       	  $this->AbreCelula($label,$ajuda,"lbl$Tkey");
+       }
+       $this->iframe = true;
+       $Tvalue = htmlspecialchars($Tvalue);
+       #onfocus=\";\"statusbar('$ajuda')
+        echo "<input class='nnulo' type='text' $mactive\n "                
+             ."name='$suffix$Tkey' size=6 id='$suffix$Tkey' value='$val1'\n"
+             ."onblur=\"direto(this,'$Tkey','$Tvalue','$Ttable','$wh','$suffix','$arq')";
+       echo  "\"\nonKeyPress=\"return teclas(event);\"\n"
+             ."title='$label'>\n";
+       echo  "<input type='text' name='$suffix$Tvalue' $mactive id='$suffix$Tvalue'\n "
+             ."title='$label' $fcfocus value='$val2' class='input' size='25'\n ";
+       if ($combo == true){
+         echo "";
+        }                 
+        echo " value='$val2'>\n";
+        if ($combo == true){
+           echo  "<div id='$Tvalue$Tkey' class='lstitens'
+                  style='position:absolute;width:350px;border:1px solid #999999; max-height:100px;overflow:auto;
+                   visibility:hidden;background-color:#eeeee2'>
+                 </div> ";
+        }
+        if ($active == 1 ){ 
+           echo  "<a href='' id='".$Tvalue."Ab'\n"
+           ."onclick=\"window.if_janela.location.href='$fc';if (winList['janela']) winList['janela'].open(); return false;\">\n"
+           ."<img src='".$this->dblibs."/imagens/find2.png' border='0'></a>";
+        }   
+        
+       
+       
+      if ($cel == 1){
+          $this->FechaCelula();
+      }
+      if ($combo == true){
+      	  echo "<script>
+				var ".$Tvalue.$Tkey."l    = new dmsAutoComplete('$suffix$Tvalue','$Tvalue$Tkey','fc_frmdbconsulta.php');
+				".$Tvalue.$Tkey."l.ttable     = '$Ttable';
+		  		".$Tvalue.$Tkey."l.tkey       = '$Tkey';
+				".$Tvalue.$Tkey."l.tvalue     = '$Tvalue';
+				".$Tvalue.$Tkey."l.twh        = '$wh';
+				".$Tvalue.$Tkey."l.chooseFunc = function(id,label){
+			
+		   	    	\$i('$suffix$Tkey').value=id;
+			    	\$i('$suffix$Tvalue').value=label;
+			    	findNextWidget('$suffix$Tvalue','".$this->frm_nome."');
+			
+				}
+				</script>\n";
+      }
+  }
+     
+     function FrmDbConsulta2($label,$sufix,$Ttable,$Tkey,$Tvalue,$fc,
+                              $ajuda="",$combo=false,$val1='',$val2='',$active=1,$where=''){
+       $nome_div = $Tkey.rand(0,1000);
+       $nomear   = "dados".rand(0,2000);
+       if ($this->dblibs !="libs"){$fcdir = "../fc_direto";}else{$fcdir="fc_direto";}
+       if ($combo == true){
+          $fcfocus = "onfocus='setxy$nome_div(this);'";
+          if ($where){
+              $wh = "where 1=1 ". $where;
+          }
+          $sql     = "select ".$Tkey.", ".$Tvalue." from ".$Ttable." $wh order by ".$Tvalue;
+          $rs      = pg_query($sql);
+         // echo $sql."<br>";
+          echo "<script>"; 
+          $i = 1;
+          //escrevendo a array com os dados....
+          echo "$nomear = new Array()\n";
+          while ($ln = pg_fetch_array($rs)){
+          	   $ln[1] = str_replace("\"","",$ln[1]);
+               echo $nomear."[$i] = \"".$ln[0]."#".$ln[1]."\";\n";
+              $i++;
+          }
+         
+       echo "function setxy$nome_div(item){
+             x = getPageOffsetLeft(item);
+             y = getPageOffsetTop(item)+20;
+             document.getElementById('$nome_div').style.top=y+\"px\";
+             document.getElementById('$nome_div').style.left=x+\"px\";
+      
+      }    
+      function busca_array$nome_div(direto){
+      document.getElementById('$nome_div').innerHTML=''
+      var texto  = document.".$this->frm_nome.".".$sufix.$Tvalue.";
+      var codigo = document.".$this->frm_nome.".".$sufix.$Tkey.";
+      if (direto == false){
+         if (texto.value.length != 0 && codigo.value == ''){
+            for (i = 1; i < $nomear.length;i++){
+                cod = ".$nomear."[i].split('#'); 
+               if (cod[1].toLowerCase().indexOf(texto.value.toLowerCase()) != '-1'){
+                   document.getElementById('$nome_div').style.visibility='visible';
+                   document.getElementById('$nome_div').innerHTML+=\"<a class='cblinha' onKeyDown='proximo2(this,event)'           href=\\\"javascript:js_completa(document.".$this->frm_nome.".".$sufix.$Tkey.",document.".$this->frm_nome.".".$sufix.$Tvalue.",'\"+cod[0]+\"','\"+cod[1]+\"');\\\">\"+cod[1]+\"</a>\";
+                }
+            }
+         }else{
+           document.getElementById('$nome_div').innerHTML='';
+           document.getElementById('$nome_div').style.visibility='hidden';
+         }   
+        }else{
+           if (codigo.value != ''){
+             for (i = 1; i < $nomear.length;i++){
+                cod2 = ".$nomear."[i].split(\"#\"); 
+               if (cod2[0].substring(0,codigo.value.length) == codigo.value){
+                   document.getElementById('$sufix.$Tvalue').value=cod2[1];
+               }
+            }   
+        
+          }
+        } 
+    }    
+    
+    function XY(x,y,layer){
+      // alert(x+'/'+y);
+       document.getElementById(layer).style.top=eval(y+10)+'px';
+       document.getElementById(layer).style.left=eval(x-10)+'px';
+   }   
+      </script>";
+     
+     }
+       if ($active == 1 ){
+       	  $mactive = "";
+       }else{
+       	  $mactive = "readonly";
+       }	  	
+       $this->AbreCelula($label,$ajuda);
+       $this->iframe = true;
+       $Tvalue = htmlspecialchars($Tvalue);
+        echo "<input class='nnulo' type='text' $mactive\n onfocus=\"statusbar('$ajuda');\""               
+             ."name='$sufix$Tkey' size=6 id='$sufix$Tkey' value='$val1'\n"
+             ."onblur=\"direto(this,'$Tkey','$Tvalue','$Ttable','$wh','$sufix');statusbar('&nbsp;')\"";
+       echo  "\"\nonKeyPress=\"return teclas(event);\"\n"
+             ."title='$label'>\n";
+       echo  "&nbsp;<input type='text' name='$sufix$Tvalue' $mactive id='$sufix$Tvalue'\n"
+             ."title='$label' $fcfocus value='$val2' class='input' size='25'\n"
+             ."onkeyUp=\"c_maiuscula(this);carrega(this,'$Tkey','$Tvalue','$Ttable','$wh','$sufix');\"";
+       if ($combo == true){
+         echo "busca_array$nome_div(false)"; 
+        }                 
+        echo "\" value='$val2'>\n";
+        if ($combo == true){
+           echo  "<div id='$nome_div' 
+                  style='position:absolute;width:350px;border:1px solid #999999; max-height:100px;overflow:auto; visibility:hidden;background-color:#eeeee2'>
+                 </div> ";
+        }
+        if ($active == 1 ){ 
+           echo  "<a href='' id='".$sufix.$Tvalue."Ab'\n"
+           ."onclick=\"window.if_janela.location.href='$fc?sufix=$sufix';if (winList['janela']) winList['janela'].open(); return false;\">\n"
+           ."<img src='".$this->dblibs."/imagens/find2.png' border='0'></a>";
+        }   
+        echo "</td>\n";
+       if ($combo == true){
+          echo "<script>
+                function testa_combo(){
+                   if (document.getElementById('$nome_div').style.visibility=='visible'){
+                      document.getElementById('$nome_div').style.visibility='hidden'  
+                   }
+                }
+               document.getElementById('xfdge').addEventListener('click',testa_combo,false);  
+          
+          </script>";
+       
+       }
+       $this->FechaCelula();
+     }
+     
+     /* @desc Cria Um conjuto de tabs /**
+        * @return tab
+        * @param array $itens   $array[0]["Tab"]    = Etiqueta Da Tab;
+                                $array[0]["arq"]    = arqui/vo a ser mostrado;
+                                $array[0]["Active"] = inicia Ativa ou não;
+        */
+     function TabNav($itens,$height="80%",$width="100%"){
+        if (!is_array($itens)){
+           $this->erro('Erro: $itens deve ser um Array');
+        }else{
+           echo "<div>
+                 <div class='tabArea'>";
+           for ($i = 0;count($itens) > $i; $i++){
+              if ($itens[$i]["Active"] == 1){
+                 $active = 'activeTab';
+              }else{
+                 $active='tab';
+              }
+              $tabat = $itens[$i]["Tab"].$i;
+              $ak = ($i+1);
+              echo "<a class='$active'  
+                    id='$tabat' accesskey='$ak' onclick=\"mo_camada('".$itens[$i]["Tab"]."','$tabat');\">".$itens[$i]["Tab"]."</a>";
+           }
+           echo "</div><div class='tabMain' style='height:$height;zindex='-1'>";
+           for ($j = 0;count($itens) > $j; $j++){
+              if ($itens[$j]["Active"] == 1){
+                 $dactive = 'visible';
+              }else{
+                 $dactive='hidden';
+              }
+              echo "<div class='tab' name='".$itens[$j]["Tab"].$j."' id='".$itens[$j]["Tab"]."' style='visibility:$dactive;height:95%;'>   
+                    <iframe class='tabContent' name='".str_replace(" ",'',$itens[$j]["Tab"]).$j."' src='".$itens[$j]["arq"]."'
+                     marginheight='8' marginwidth='8' frameborder='0'></iframe> </div>";
+            }         
+           echo "</div></div>";    
+          } 
+           
+     }
+     function validate($string){
+       if ($string != ""){
+           $parm = strlen($string);
+           $keyPress = "";
+           for ($i = 0;$i < $parm;$i++){
+               $fcn = substr($string,$i,1);
+               if ($fcn == "A"){
+                  echo "\nonkeyUp=\"c_maiuscula(this)\"";
+               }else if($fcn == "E"){
+                  echo "\nclass=\"nnulo\"";
+               }elseif($fcn =="N"){
+                  echo $keyPress .= "\return teclas(event);";
+               }elseif($fcn =="R"){
+                  echo "readonly";
+               }   
+           }
+        }
+     
+     }
+     function frmPickColor($label,$name,$valida,$valret=""){
+        $this->abreCelula($label,"Paleta de Cores","lbl$name");
+        echo "<input type='text' size='10' id='$name' class='input' name='$name'";
+        $this->validate($valida);
+        echo " value='$valret'>";
+        echo "<img src='libs/imagens/cp.png' style='cursor:pointer'
+              onclick=\"cpicker(event.clientX,event.clientY,'$name')\")>";
+        if ($valret != ""){
+           echo "<script>document.getElementById('$name').style.background = '$valret';</script>";
+        
+        }      
+        $this->fechaCelula();
+        $this->pickcolor = true;
+     
+     }
+     
+     function mkpickColor(){
+       if ($this->pickcolor == true){
+           echo   "<div id=\"cpicker\" class=\"janela\" style=\"left:320px;top:40px;width:300px;height:260px\">\n
+                  <div class=\"titleBar\">\n
+                  <span class=\"titleBarText\" id=\"titulo\">Paleta de Cores</span>\n
+                  <img  alt='' src='libs/imagens/close.jpg' \n
+                  onclick='cpicker_close()'/>\n
+                  </div>\n
+                  <div class='clientArea' style='height:220px;background-color:#cccccc' >\n
+                  <iframe name='cp' width='100%' height='100%'frameborder=0></iframe>\n
+                  </div>\n
+                  </div>\n";
+       }          
+     
+     
+     }
+     
+      function frmBDel($caption,$arqret,$table,$var,$id,$log=0){
+
+         echo "<button name='btndel' class='botao'"
+             ."onclick=\"if (confirm('Confirma exclusão?')==true)location.href='fc_delete.php?ttable=$table&retarq=$arqret&fkey=$var&fvalue=$id&log=$log'\">
+             <img src='libs/imagens/gtk_close.png' border=0> $caption
+             </button>";
+
+    }
+    
+    /**
+     * Cria um Fieldset na tela.
+     *
+     * @param Int $open
+     * @param string $caption
+     * @return object 
+     */
+    function fieldset($open,$caption=""){
+        if ($open == 1){
+            $this->append("<td colspan=10><fieldset>");
+            if ($caption != ""){
+               $this->Append("<legend><b>$caption </b></legend>");
+            }  
+            $this->append("<table border=0 >");
+        }else{
+             $this->append("</table></td></fieldset>");
+        }        
+    }         
+    
+   function FrmBtnOpen($caption,$nome,$alvo,$winName,$ajuda="",$ak=''){
+
+   	     $caption=str_replace($ak,"<u>".$ak."</u>",$caption);
+         echo "<button type='submit' name='$nome' id='$nome' class='botao'"
+             ."onclick=\"document.".$this->frm_nome.".action='".$alvo."';
+             			 document.".$this->frm_nome.".target='$winName';
+                         document.".$this->frm_nome.".submit();
+                         winList['$winName'].open();
+                         document.".$this->frm_nome.".target='';
+                         document.".$this->frm_nome.".action='';
+                         return false;
+             \"><img src='libs/imagens/gtk_find.png' border=0>$caption</button>";
+
+    }
+    
+    function FrmTime($label, $name,$ajuda="",$valida="",$valor="",$cel=1,$function=''){
+            
+           $mimg = true; 
+           if ($cel == 1){
+              $this->AbreCelula($label,$ajuda,"lbl$name");
+           }
+           if (strpos($function,"onBlur") !== false  ){
+           	 $onblur = str_ireplace("onblur=\"","",$function);
+           	 $onblur = str_ireplace("\"","",$function);
+           	 $function = "";
+           }
+           echo "<input type='text' name='$name'  id='$name'\n onfocus=\"statusbar('$ajuda');\"
+                 onblur=\"$onblur statusbar('&nbsp;');\" $function"
+                 ."maxlength='8' onkeyPress=\"return vl_time(this,event);pressKey(event,'0-9')\"\n";
+           if (isset($valor)){
+             echo   "value='$valor' ";      
+           }  
+           if ($valida != ""){
+               $parm = strlen($valida);
+               for ($i = 0;$i < $parm;$i++){
+                    if ($i == $parm ){
+                        $tag = ">";
+                    }  
+                    $fcn = substr($valida,$i,1);
+                    if ($fcn == "A"){
+                        echo "\nonkeyUp=\"c_maiuscula(this)\"";
+                    }else if($fcn == "E"){
+                        echo "\nclass=\"nnulo\"";
+                    }elseif($fcn =="N"){
+                        echo "\nonKeyPress=\"return teclas(event);\"";
+                    }elseif($fcn =="R"){
+                        echo "readonly  style='background-color:#E6E6E6'";
+                        $mimg = false;
+                    }   
+                }
+           }
+           echo  "title='$label' size=11 style='$style'";
+           if ($cel == 1){
+              $this->FechaCelula();
+          }
+      }
+ }
+?>

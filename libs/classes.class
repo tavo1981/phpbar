@@ -1,0 +1,675 @@
+<?
+class db {
+
+   var $recorset = null;
+   var $num_rows = 0;
+   var $sql      = "";
+   var $con      = null;
+   var $erro     = null;
+   var $dados    = null;
+   var $_DEBUG   = 0;
+   var $_tnumbers = array("float","integer","numeric","bigint");
+   
+   //função construtora da classe;
+   function db($arqconf="config.php",$db="pgsql"){
+   	
+      require($arqconf);
+      if (isset($_SESSION["_BASE"])){
+      	
+      	  $base = $_SESSION["_BASE"];
+      	  
+        } else {
+          	
+          	  $base = $DB;
+          	  $_SESSION["_BASE"] == $DB;
+          	  
+          }
+          
+          $this->con = pg_connect("dbname='$base' user='$USUARIO' password='$SENHA' host='$HOST'");
+        
+    } 
+
+   function begin(){
+   	
+      $this->executa("begin");
+      
+   }
+
+   function rollback(){
+   	
+      $this->executa("rollback");
+      
+   }
+
+   function commit(){
+    	
+      $this->executa("commit");
+      
+   }
+   
+   function getJoinRecord($join,$wh='',$order='',$exec=1){
+   	
+   	    $strjoin = str_replace("(=)"," inner join ",$join);
+   	    $strjoin = str_replace("(+)"," left outer join ",$strjoin);
+   	    $strjoin = str_replace("(-)"," right outer join ",$strjoin);
+   	    $strjoin = str_replace("|", " on ",$strjoin);
+   	    $wh    = $wh != ''?" where $wh":''; 
+   	    $order = $order != ''?" order by $order":'';
+   	    $sql   = "select * from $strjoin $wh $order";
+   	    
+   	    if ($exec == 1){
+   	    	
+   	    	$rs = $this->executa($sql);   	    	
+   	    	
+   	    }else{
+   	    	
+   	    	$rs = $sql;
+   	    	
+   	    }
+   	    
+   	    return $rs; 	
+   }
+   
+   //
+   /**
+    * função para executar comandos sql
+    *
+    * @param string $sql
+    * @param boolean $fetch
+    * @return recordset
+    */
+   function executa($sql,$fetch=false,$nomevar=dados){
+   	   
+       $rs =   @pg_query($this->con,$sql);
+       $this->num_rows = @ pg_num_rows($rs);
+       $this->erro = str_replace("\"","",str_replace("\n","",pg_last_error()));
+       $this->erro = str_replace("ERROR","Erro:",$this->erro);
+       
+       if ($this->_DEBUG == 1){
+
+       		$this->db_error($sql,1);
+          
+       }
+       
+       if ($fetch == true){
+       	
+       	  unset($this->$nomevar);
+          $this->$nomevar =  @pg_fetch_array($rs);
+          
+       }else{
+       	
+          return $rs;
+          
+       }
+    
+   }
+
+   //funçao para retornar o ultimo id inserido na tabela;
+   function last_id($tabela,$campo=""){
+   	
+      if (campo == ""){
+      	
+          $campo = substr($tabela,0,3)."_id";
+          
+      }
+      
+      $sql = "select max($campo) as last_id from $tabela";
+      $last_id = pg_result($this->executa($sql),0,"last_id");
+      return $last_id;
+      
+   }
+
+   function getAll($table,$wh='',$order='',$exec = 1){
+   	
+   	 $wh    = $wh != ''?" where $wh":''; 
+   	 $order = $order != ''?" order by $order":'';
+   	 $sql   = "select * from $table $wh $order";
+   	 if ($exec == 1){
+   	 	
+   	  	$rs    = $this->executa($sql); 
+   	 	return  $rs;
+   	 	
+   	 } else {
+   	 	
+   	 	return $sql;		
+   	 	
+   	 }
+   	
+   }
+   
+   function getRowField($recordset,$row,$field){
+   	
+   		return pg_result($recordset,$recordset,$field);
+   	
+   }
+   
+   function trata_erro(){
+   	   $erro = pg_last_error();
+       if (strpos($this->erro,"key referenced",0)){
+       	
+          $err = "Referencia Violada";
+
+       }
+       
+       if (strpos($this->erro,"duplicate key",0)){
+       	
+          $err = "Dados unicos duplicados ";
+          
+       }
+       
+       if (strpos($this->erro,"Bad date external representation",0)){
+       	
+          $err = "Formato de Data Incorreto";
+          
+       }
+       
+       if (strpos($this->erro,"Fail to add null value in not null attribute",0)){
+       	
+          $err = "Valor Nulo";
+          
+       }
+       
+       if (strpos($this->erro,"bad int8 external representation",0)){
+       	
+           $err = "O valor Dado não é número valido";
+           
+       }
+       
+       if (strpos($this->erro,"unique",0)){
+       	
+           $err = "Dados únicos duplicados";
+           
+       }
+       
+       return "Erro::$err";
+       
+    }
+
+   function valida_trans($sql,$mess=1,$mostra=false,$tabela=""){
+   	
+      $msg = array (
+                    1 => "Cadastro efetuado com sucesso!",
+                    2 => "Alteração efetuada com sucesso!",
+                    3 => "Exclusão efetuada com sucesso!");
+      $this->begin();
+      $this->recorset =  $this->executa($sql);
+      
+      if (!$this->recorset){
+      	
+      	     echo "<script>alert(\"A Operação não pode ser Concluída.\\n\\n\\n Admin:".$this->erro."\")</script>";
+             $this->rollback();
+            //echo "<br><br>".$erro;
+            
+      }else{
+      	
+         $this->commit();
+         if ($mess != 0){
+         	
+            if ($mostra == true){
+            	
+               echo "<script>alert('".$msg[$mess]."\\n\\nCódigo:".$this->last_id($tabela)."')</script>";
+               
+            }else{
+            	
+               echo "<script>alert('".$msg[$mess]."');</script>";
+               
+           }
+           
+         } 
+          
+     }
+     
+   }
+
+   /**
+    * Transforma o recorset em um Array
+    * @param resource $result
+    * @return Array
+    */
+   function fetch_array($result){
+   	
+      return pg_fetch_array($result);
+      
+   }
+
+   function dselect($tabela,$campo="",$valor="",$retorna=false,$rsql=false){
+   	
+       if (!isset($tabela)){
+       	
+           die("Parametro 'tabela' não pode ser vazio");
+           
+       }else{
+       	
+           $sql = "select * from $tabela";
+           
+       }
+       
+       if ($campo != "" ){
+       	
+           $sql .= " where $campo = '$valor'";
+
+       }
+     
+       $this->recordset =  $this->executa($sql);
+       if ($retorna == true){
+       	
+          $this->dados = $this->fetch_array($this->recordset);
+          
+       }
+       
+       if ($rsql == true){
+       	
+          echo "<br><br>".$sql;
+       
+       }      
+
+   }
+
+   function insert ($campos,$tabela){
+   	
+       $inicio ="insert into $tabela (";
+       $meio = ") values (";
+       $virgula="";
+       while (list($key, $value) = each($campos)){
+       	
+          if (strpos($key,'dt',0)){
+          	
+              if ($value == ""){
+              	
+                  $value = "";
+                  
+              }else{
+              	
+                $aux = explode("/",$value);
+                $value = $aux[2].$aux[1].$aux[0];
+                
+              }
+              
+          }
+          if (in_array($this->getFieldType($key),$this->_tnumbers)){ 
+      	
+      		 $value = $this->todecimal($value);
+      	
+      	  }
+          
+          if ($value != ""){
+          	
+             $inicio = $inicio.$virgula.$key;
+             
+             if (strpos($value,'select ',0)){
+             	
+                $fim = $fim.$virgula.$value;
+                
+             }else{
+             	
+                $fim = $fim.$virgula."'$value'";
+                
+            }
+            
+          }else{
+          	
+             $inicio = $inicio.$virgula.$key;
+             $fim = $fim.$virgula."null";
+             
+         }
+         
+         $sql = $inicio.$meio.$fim.")";
+         $virgula=",";
+         
+       }
+       return $sql;
+   }
+
+//função para atualizar
+function update($campos, $tabela,$meta,$valor){
+	
+   $inicio = "update $tabela set ";
+   $clausula = "where $meta = $valor";
+   while (list($key, $value) = each($campos)){
+      if (strpos($key,'dt',0)){
+         $aux = explode("/",$value);
+         $value = $aux[2].$aux[1].$aux[0];
+      }
+      //if ($value == "DEFAULT"){
+      //    $inicio = $inicio.$key."= DEFAULT, ";
+      //} 
+      
+      if (in_array($this->getFieldType($key),$this->_tnumbers)){       		
+      	    $value = $this->todecimal($value);     	
+      }
+      
+      if ($value == ""){
+          $inicio = $inicio.$key."= null, ";
+      }else{
+          if (strtolower($value) == "default"){
+              $inicio = $inicio.$key."= DEFAULT, ";
+          }else{
+              $inicio = $inicio.$key."='".$value."', ";
+          }
+      }
+          $sql = $inicio.$clausula;
+          $sql = ereg_replace(", where"," where ",$sql);
+   }
+   return $sql;
+}
+//função para consultas
+function select($campos,$from,$meta,$order="",$wh="",$igz=0){
+   $inicio = "select $campos from " ;
+   if (!is_array($meta)){
+      $sql = "select $campos from $tabela";
+      if ($wh != ""){
+         $sql .= " where $wh";
+      }else{
+         $sql .= " $wh";
+      }
+   }else{
+      while (list($key, $valor) = each($meta)){
+           if ($valor != ""){
+              if ($sql != ""){
+                  $where = $where." and ";
+              }
+              if (strpos($key,'dt',0)){
+                  $aux = explode("/",$valor);
+                  $valor = $aux[2].$aux[1].$aux[0];
+              }
+              $cpo = explode("(=)",$key);
+              
+              if (strpos($key,'_id',0) or (strpos($key,'dt',0) or (strpos($key,'(=)',0)))){
+              	 	
+                  $where = $where." $cpo[0] = '$valor'";
+              }else{
+                  $where = $where." to_ascii($key) like to_ascii('$valor%')";
+              }
+           }
+             if ($where != ""){
+                $sql = $inicio.$from." where ".$where;
+                if ($order != ""){
+                    $sql = $inicio.$from." where ".$where;
+                }
+           }else{
+              $sql = $inicio.$from;
+           }
+           $sql = ereg_replace("where  and"," where ",$sql);
+           if ($wh != ""){
+               $sql = $sql." ".$wh;
+           
+           }
+           if ($order != ""){
+              $sql .= " order by ".$order;
+           }
+      }
+   }
+   return $sql;
+ }
+ function db_error($sql,$exit=1){
+ 	
+    if ($this->erro != ""){
+    	
+       echo "<br><b>Erro:</b>".$this->erro."<br>";
+       echo "<b>SQL:</b>$sql";
+       if ($exit == 1){
+       	
+          exit;
+       }   
+    } 
+ }  
+ 
+ function result_seek($recordset,$row){
+     return pg_result_seek($recordset,$row);
+ }
+ function getAttTable($table,$field = ''){
+	$sql = "SELECT
+		         rel.nspname, 
+		         rel.relname, 
+		         attrs.attname, 
+		         \"Type\", 
+		         \"Default\",
+		        attrs.attnotnull 
+            FROM (
+	              SELECT c.oid, 
+	                     n.nspname,
+	                     c.relname 
+	              FROM   pg_catalog.pg_class   c 
+	                     LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace 
+	              WHERE  pg_catalog.pg_table_is_visible(c.oid)   ) rel 
+            JOIN (
+	              SELECT a.attname, 
+	                     a.attrelid, 
+	                     pg_catalog.format_type(a.atttypid,   a.atttypmod) as \"Type\",
+	                    (SELECT substring(d.adsrc for 128) FROM pg_catalog.pg_attrdef   d 
+	                     WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum AND a.atthasdef)  as \"Default\",   
+                         a.attnotnull, a.attnum 
+	              FROM pg_catalog.pg_attribute a WHERE a.attnum > 0   AND NOT a.attisdropped ) attrs 
+	        ON (attrs.attrelid = rel.oid ) 
+	        WHERE relname = '$table'";
+    if ($field != ''){
+    	
+    	$sql .= " and attrs.attname = '$field' ";
+    	
+    }
+	$sql .= "  ORDER BY attrs.attnum;";	
+	$rs = $this->executa($sql);
+	return $rs;
+  }
+  
+  function doInsert($table ,$exeptions=null){
+      
+  	  $strins = " insert into $table (";
+  	  $fieldsTable = $this->getAttTable($table);
+  	  $v = "";
+  	  while ($ln = $this->fetch_array($fieldsTable)){
+  	  	
+  	  	   if (!strchr($ln["Default"],"nextval")){
+  	  	   	
+  	  	    	  $strins .= $v.$ln["attname"];
+  	  	    	  $v = ", ";
+  	  	    	  
+  	  	   }
+  	  	    	  	
+  	  }
+  	  
+  	  $strins .= ") values (";
+  	  $this->result_seek($fieldsTable,0);
+  	  $v    = "";
+  	  $erro = 0;
+  	  $quote= "'";
+  	 
+  	  while ($ln = $this->fetch_array($fieldsTable) and $erro == 0){
+  	  	
+  	  	   if (in_array($ln["Type"],$this->_tnumbers)){
+  	  	   	
+  	  	   	   $quote = '';
+  	  	   	
+  	  	   }else{
+  	  	   	
+  	  	   		$quote="'";
+  	  	   		
+  	  	   }
+  	  	   
+  	 	   if (!strchr($ln["Default"],"nextval")){
+  	 	   	  
+  	 	   	  if (@array_key_exists($ln["attname"],$exeptions)){
+  	 	   	  	 if ($ln["attnotnull"] == 't' and  $exeptions[$ln["attname"]] == ""){
+  	 	   	  	 	$msg .= $ln["attname"];
+  	 	   	  	 	$erro ++;
+  	 	   	  	 	
+  	 	   	  	 }
+  	 	   	  	 if (strchr($exeptions[$ln["attname"]],"select")){
+  	 	   	  	 	 $quote = "";
+  	 	   	  	 }else if($exeptions[$ln["attname"]] == ""){
+  	 	   	  	 	 $quote = "";  	 	   	  	 	
+  	 	   	  	 }
+  	 	   	  	 
+  	 	   	  	 $value = $exeptions[$ln["attname"]] == ""?"null":$exeptions[$ln["attname"]];
+  	 	   	  	 if ($ln["Type"] == 'date' > 0 and $exeptions[$ln["attname"]] != ""){
+                    $aux = explode("/",$exeptions[$ln["attname"]]);
+                    $value = $aux[2].$aux[1].$aux[0];
+                  }
+                  $strins .= $v.$quote.$value.$quote;
+  	    	      $v = ", ";
+  	 	   	  }else{
+  	 	   	  	 if ($ln["attnotnull"] == 't' and $_POST[$ln["attname"]] == ""){
+  	 	   	  	 	$msg .= $ln["attname"];
+  	 	   	  	 	$erro++;
+  	 	   	  	 }
+  	 	   	  	 $quote = $_POST[$ln["attname"]] == ""?"":"'";
+  	 	   	  	 $value = $_POST[$ln["attname"]] == ""?"null":$_POST[$ln["attname"]];
+  	 	   	  	 if (in_array($this->getFieldType($ln["attname"]),$this->_tnumbers)){       		
+      				    $value = $this->todecimal($value);     	
+      			 }
+  	 	   	  	 if ($ln["Type"] == 'date'){
+                    $aux = explode("/",$value);
+                    $value = $aux[2].$aux[1].$aux[0];
+                    
+                  }
+                 $strins .= $v.$quote.$value.$quote;
+  	    	  	 $v = ", ";
+  	 	   	  }
+  	  	    }
+  	  	    $quote = "'"; 	  	 			
+  	  }
+  	  $strins .= ")";
+  	  if ($erro != 0 ){
+  	  	  echo "<script>alert('Campo Obrigatório nulo\\Campo: $msg');history.back()</script>";
+  	  }else {
+	     return $strins;
+  	  }
+   }
+   
+   function doUpdate($table ,$exeptions=null,$wh=null){
+      
+  	  $strins = "update $table set ";
+  	  $fieldsTable = $this->getAttTable($table);
+  	  $v = "";
+  	  $this->result_seek($fieldsTable,0);
+  	  $v    = "";
+  	  $erro = 0;
+  	  $quote= "'";
+  	  while ($ln = $this->fetch_array($fieldsTable)){
+  	  	   if (in_array($this->getFieldType($ln["attname"]),$this->_tnumbers)){
+  	  	   	   $quote = '';
+  	  	   	
+  	  	   }else {
+  	  	   	   $quote="'";
+  	  	   }
+  	 	   if (!strchr($ln["Default"],"nextval")){
+  	 	   	  
+  	 	   	  if (@array_key_exists($ln["attname"],$exeptions)){
+  	 	   	  	 if ($ln["attnotnull"] == 't' and  $exeptions[$ln["attname"]] == ""){
+  	 	   	  	 	$erro ++;
+  	 	   	  	 }
+  	 	   	  	 if (strchr($exeptions[$ln["attname"]],"select")){
+  	 	   	  	 	 $quote = "";
+  	 	   	  	 }else if($exeptions[$ln["attname"]] == ""){
+  	 	   	  	 	 $quote = "";  	 	   	  	 	
+  	 	   	  	 }else{
+  	 	   	  	 	$quote = "'";
+  	 	   	  	 }
+  	 	   	  	 
+  	 	   	  	 $value   = $exeptions[$ln["attname"]] == ""?"null":$exeptions[$ln["attname"]];
+  	 	   	  	 if (strpos($exeptions[$ln["attname"]],'_dt',0) >= 0){
+                    $aux = explode("/",$value);
+                    $value = $aux[2].$aux[1].$aux[0];
+                    
+                 }
+  	 	   	  	 $strins .= $v.$ln["attname"]." = ".$quote.$value.$quote;
+  	 	   	  	 $v = ", ";
+  	 	   	  }else{
+  	 	   	  	 if ($ln["attnotnull"] == 't' and $_POST[$ln["attname"]] == ""){
+  	 	   	  	 	echo "<script>alert('Campo Obrigatório nulo\\nCampo:".$ln["attname"]."');history.go(-1)</script>";
+  	 	   	  	 	$erro++;
+  	 	   	  	 }
+  	 	   	  	 $quote = $_POST[$ln["attname"]] == ""?"":"'";
+  	 	   	  	 $value = $_POST[$ln["attname"]] == ""?"null":$_POST[$ln["attname"]];
+  	 	   	  	 if (strpos($_POST[$ln["attname"]],'_dt',0) >= 0){
+                    $aux   = explode("/",$value);
+                    $value = $aux[2].$aux[1].$aux[0];
+                    
+                 }
+                 //messagebox($ln["attname"].$this->getFieldType($ln["attname"]));
+                 if (in_array($this->getFieldType($ln["attname"]),$this->_tnumbers)){       		
+                 	
+      			    $value = $this->todecimal($value);     	
+      			 }
+  	    	  	 $strins .= $v.$ln["attname"]." = ".$quote.$value.$quote;
+  	    	  	 $v = ", ";
+  	 	   	  }
+  	  	    }
+  	  	    $quote = "'"; 	  	 			
+  	  }
+  	  $strins .= " ".$wh;
+  	  if ($erro != 0 ){
+  	  	  echo "<script>alert('Campo Obrigatório nulo');history.go(-1)</script>";
+  	   	  return false;
+  	  }else {
+	     return $strins;
+  	  }
+   }
+   
+   
+   function rs2array($rs){
+   	
+   	 //for ($i = 0;$i < pg_num_fields($lmt);$i++)
+   	
+   }
+   
+   	function toDecimal($valor){
+		
+   		$valor = str_replace(".",'',"$valor");
+		return	str_replace(",",".",$valor);
+		
+		
+	}
+	
+	function getFieldType($field){
+		
+		
+		$rs = $this->executa("SELECT distinct attname, pg_catalog.format_type(atttypid,  atttypmod)  as tipo
+		                      from pg_attribute where attname = '$field' and  attnum > 0   AND NOT attisdropped",true,"type");
+        $type = ereg_replace("[0-9]|[(,)]",'',$this->type["tipo"]);
+        return $type;        
+		
+	}
+   
+   
+}
+
+class db2  extends db {
+
+   var $recorset = null;
+   var $num_rows = 0;
+   var $sql      = "";
+   var $con      = null;
+   var $erro     = null;
+   var $dados    = null;
+   var $_DEBUG   = 0;
+
+   //função construtora da classe;
+   function db2($db="pgsql"){
+     
+          $this->con = pg_connect("dbname='sapiranga' user='postgres' password='' host='192.168.0.3' port='5432'");
+        
+    }
+  
+   
+	//função para exclusão
+	function delete($tabela,$meta,$valor){
+		
+  		$inicio   = "delete from $tabela ";
+    	$clausula = "where $meta = $valor";
+   		$sql = $inicio.$clausula;
+   		return $sql;
+   		
+	}
+	
+	function dbClose(){
+		
+		pg_close($this->con);
+		
+	}
+	
+
+
+}
+
+?>
