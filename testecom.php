@@ -9,4 +9,5 @@ require("classes/class_atendimento.php");
 $db   = new db();
 $ate = new atendimento(26,$db);
 $ate->emite();
+
 ?>
